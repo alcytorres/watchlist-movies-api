@@ -9,6 +9,11 @@ Rails.application.routes.draw do
   # root "posts#index"
 
 
+  post "/users" => "users#create"
+
+
+
   get "/movies" => "movies#index"
+
 
 end
