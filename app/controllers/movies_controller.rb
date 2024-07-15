@@ -8,4 +8,9 @@ class MoviesController < ApplicationController
     render :index
   end
 
+  def show
+    @movie = Movie.find_by(id: params[:id])
+    render :show
+  end
+
 end
