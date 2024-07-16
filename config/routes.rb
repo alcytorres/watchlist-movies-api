@@ -19,5 +19,7 @@ Rails.application.routes.draw do
 
   get "/favorite_movies" => "favorite_movies#index"
   post "/favorite_movies" => "favorite_movies#create"
+  delete "/favorite_movies/:id" => "favorite_movies#destroy"
+
 
 end

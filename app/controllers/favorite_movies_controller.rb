@@ -6,7 +6,6 @@ class FavoriteMoviesController < ApplicationController
     render :index
   end
 
-
   def create
     @favorite_movie = FavoriteMovie.create(
       user_id: params[:user_id],
@@ -14,5 +13,12 @@ class FavoriteMoviesController < ApplicationController
     )
     render :show
   end
+
+  def destroy
+    @favorite_movie = FavoriteMovie.find_by(id: params[:id])
+    @favorite_movie.destroy
+    render json: { message: "Favorite Movie destroyed successfully" }
+  end
+
 
 end
