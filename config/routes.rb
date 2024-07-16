@@ -17,4 +17,7 @@ Rails.application.routes.draw do
   get "/movies/:id" => "movies#show"
 
 
+  get "/favorite_movies" => "favorite_movies#index"
+  post "/favorite_movies" => "favorite_movies#create"
+
 end
