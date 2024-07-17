@@ -5,21 +5,29 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # authentication - who is using the app
+  # authorization - who is allowed to do what
+
   # Defines the root path route ("/")
   # root "posts#index"
 
+  post "/users" => "users#create"  # everyone
+  post "/sessions" => "sessions#create"  # everyone
 
-  post "/users" => "users#create"
-  post "/sessions" => "sessions#create"
 
-
-  get "/movies" => "movies#index"
+  get "/movies" => "movies#index"  # everyone
   get "/movies/:id" => "movies#show"
+  post "/movies" => "movies#create"
 
 
   get "/favorite_movies" => "favorite_movies#index"
   post "/favorite_movies" => "favorite_movies#create"
   delete "/favorite_movies/:id" => "favorite_movies#destroy"
+
+  # This is a users favorite movies page.
+  # The movies that they have added to the list will show here.
+  # Add this to frontend
+  get "/user_movies" => "movies#user_movies"  # logged in
 
 
 end
