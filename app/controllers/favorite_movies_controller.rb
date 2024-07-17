@@ -8,7 +8,7 @@ class FavoriteMoviesController < ApplicationController
 
   def create
     @favorite_movie = FavoriteMovie.create(
-      user_id: params[:user_id],
+      user_id: current_user.id,
       movie_id: params[:movie_id],
     )
     render :show

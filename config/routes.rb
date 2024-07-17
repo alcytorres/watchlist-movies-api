@@ -16,8 +16,8 @@ Rails.application.routes.draw do
 
 
   get "/movies" => "movies#index"  # everyone
-  get "/movies/:id" => "movies#show"
-  post "/movies" => "movies#create"
+  get "/movies/:id" => "movies#show"  # everyone
+  post "/movies" => "movies#create"  # logged in
 
 
   get "/favorite_movies" => "favorite_movies#index"
