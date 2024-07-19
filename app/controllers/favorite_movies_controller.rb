@@ -16,9 +16,19 @@ class FavoriteMoviesController < ApplicationController
 
   def destroy
     @favorite_movie = FavoriteMovie.find_by(id: params[:id])
-    @favorite_movie.destroy
-    render json: { message: "Favorite Movie destroyed successfully" }
+    if @favorite_movie
+      @favorite_movie.destroy
+      render json: { message: "Favorite Movie destroyed successfully" }
+    else
+      render json: { error: "Favorite Movie not found" }, status: :not_found
+    end
   end
+
+  # def destroy
+  #   @favorite_movie = FavoriteMovie.find_by(id: params[:id])
+  #   @favorite_movie.destroy
+  #   render json: { message: "Favorite Movie destroyed successfully" }
+  # end
 
 
 end
