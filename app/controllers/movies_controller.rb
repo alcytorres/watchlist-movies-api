@@ -4,7 +4,13 @@ class MoviesController < ApplicationController
     p "current_user"
     p current_user
     p "current_user"
-    @movies = Movie.all
+
+    # @movies suggests the vairable holds a collection of movies
+    # @movies = Movie.all
+
+     # NEW: Exclude movies that the current user has already favorited
+     @movies = Movie.where.not(id: current_user.favorite_movies.select(:movie_id))
+
     render :index
   end
 
@@ -14,7 +20,7 @@ class MoviesController < ApplicationController
   end
 
   def show
-    @movie = Movie.find_by(id: params[:id])
+    @movie = Movie.find_by(id: params[:id])   # @movie suggests the vairable holds a single movie
     render :show
   end
 

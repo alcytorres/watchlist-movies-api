@@ -19,15 +19,15 @@ Rails.application.routes.draw do
   get "/movies/:id" => "movies#show"  # everyone
   post "/movies" => "movies#create"  # logged in
 
-
-  get "/favorite_movies" => "favorite_movies#index"
-  post "/favorite_movies" => "favorite_movies#create"
-  delete "/favorite_movies/:id" => "favorite_movies#destroy"
-
   # This is a users favorite movies page.
   # The movies that they have added to the list will show here.
   # Add this to frontend
   get "/user_movies" => "movies#user_movies"  # logged in
+
+
+  get "/favorite_movies" => "favorite_movies#index"
+  post "/favorite_movies" => "favorite_movies#create"
+  delete "/favorite_movies/:id" => "favorite_movies#destroy"
 
 
 end

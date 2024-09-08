@@ -1,8 +1,11 @@
 class FavoriteMoviesController < ApplicationController
 
-
   def index
-    @favorite_movies = FavoriteMovie.all
+    # @favorite_movies = FavoriteMovie.all
+
+     # NEW: Get the favorite movies for the current user
+     @favorite_movies = current_user.favorite_movies.includes(:movie).map(&:movie)
+
     render :index
   end
 
@@ -23,12 +26,5 @@ class FavoriteMoviesController < ApplicationController
       render json: { error: "Favorite Movie not found" }, status: :not_found
     end
   end
-
-  # def destroy
-  #   @favorite_movie = FavoriteMovie.find_by(id: params[:id])
-  #   @favorite_movie.destroy
-  #   render json: { message: "Favorite Movie destroyed successfully" }
-  # end
-
 
 end
