@@ -11,6 +11,9 @@
 /.env*
 !/.env*.erb
 
+# Ignore environment variables
+.env
+
 # Ignore all logfiles and tempfiles.
 /log/*
 /tmp/*
@@ -33,3 +36,7 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+#  This is a hidden macOS system file used by Finder to store folder attributes
+.DS_Store
+

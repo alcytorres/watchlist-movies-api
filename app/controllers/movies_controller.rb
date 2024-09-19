@@ -39,7 +39,7 @@ class MoviesController < ApplicationController
 
   # NEW: Search for a movie by title in the TMDb API
   def search_tmdb
-    tmdb_api_key = "REDACTED"
+    tmdb_api_key = ENV['TMDB_API_KEY']
     query = params[:query]
 
     url = URI("https://api.themoviedb.org/3/search/movie?api_key=#{tmdb_api_key}&query=#{URI.encode_www_form_component(query)}")
@@ -74,7 +74,7 @@ class MoviesController < ApplicationController
       )
 
       # NEW: Fetch streaming availability from Watchmode API and filter by US region
-      watchmode_api_key = "REDACTED"
+      watchmode_api_key = ENV['WATCHMODE_API_KEY']
       imdb_id = movie_details["imdb_id"]
       watchmode_url = URI("https://api.watchmode.com/v1/title/#{imdb_id}/sources/?apiKey=#{watchmode_api_key}")
       watchmode_response = Net::HTTP.get(watchmode_url)
