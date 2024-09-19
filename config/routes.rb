@@ -29,5 +29,8 @@ Rails.application.routes.draw do
   post "/favorite_movies" => "favorite_movies#create"
   delete "/favorite_movies/:id" => "favorite_movies#destroy"
 
+  # NEW: Add the route for the search_tmdb action
+  get "/search_tmdb" => "movies#search_tmdb"
+
 
 end
