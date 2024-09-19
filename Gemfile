@@ -72,3 +72,6 @@ end
 # Enables Cross-Origin Resource Sharing (CORS)
 gem "rack-cors"
 
+# Load environmental variables in development and test environments
+gem 'dotenv-rails', groups: [:development, :test]
+
