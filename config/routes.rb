@@ -32,5 +32,8 @@ Rails.application.routes.draw do
   # NEW: Add the route for the search_tmdb action
   get "/search_tmdb" => "movies#search_tmdb"
 
+   # NEW: Route for get_streaming_sources action
+  get 'get_streaming_sources', to: 'movies#get_streaming_sources'
+
 
 end
