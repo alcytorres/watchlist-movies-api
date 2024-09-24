@@ -32,12 +32,13 @@ class MoviesController < ApplicationController
       description: params[:description],
       director: params[:director],
       release_year: params[:release_year],
-      imdb_id: params[:imdb_id], # NEW: Store imdb_id
+      imdb_id: params[:imdb_id],
+      streaming_services: params[:streaming_services] # Include streaming_services
     )
     render :show
   end
 
-  # NEW: Search for movies by title in the TMDb API without saving to the database
+  # NEW: Search for movies by title using only TMDb API
   def search_tmdb
     tmdb_api_key = ENV['TMDB_API_KEY']
     puts "TMDb API Key: #{tmdb_api_key}"
@@ -50,15 +51,28 @@ class MoviesController < ApplicationController
     puts response
 
     if tmdb_results["results"] && tmdb_results["results"].any?
-      # NEW: Initialize an array to hold movie data
+      # Initialize an array to hold movie data
       movies = []
 
-      # NEW: Iterate over each movie result
+      # Mapping between TMDb provider IDs and your frontend IDs
+      streaming_service_mapping = {
+        # TMDb provider IDs mapped to your app's IDs
+        "8" => "netflix",
+        "9" => "amazon",
+        "337" => "disney",
+        "350" => "apple",
+        "1899" => "max",      # For HBO Max
+        "15" => "hulu",
+        "531" => "paramount",
+        # Add other mappings as needed
+      }
+
+      # Iterate over each movie result
       tmdb_results["results"].each do |movie|
         movie_id = movie["id"]
 
-        # Fetch movie details
-        movie_details_url = URI("https://api.themoviedb.org/3/movie/#{movie_id}?api_key=#{tmdb_api_key}&append_to_response=credits")
+        # Fetch movie details including external IDs and credits
+        movie_details_url = URI("https://api.themoviedb.org/3/movie/#{movie_id}?api_key=#{tmdb_api_key}&append_to_response=credits,external_ids")
         movie_details_response = Net::HTTP.get(movie_details_url)
         movie_details = JSON.parse(movie_details_response)
 
@@ -67,52 +81,33 @@ class MoviesController < ApplicationController
         movie_description = movie_details["overview"] || "No description available"
         movie_release_date = movie_details["release_date"] ? movie_details["release_date"].split("-")[0] : "Unknown Year"
         movie_director = movie_details.dig("credits", "crew")&.find { |person| person["job"] == "Director" }&.[]("name") || "Unknown Director"
-        movie_poster_path = movie_details["poster_path"] ? "https://image.tmdb.org/t/p/w500/#{movie_details["poster_path"]}" : nil
+        movie_poster_path = movie_details["poster_path"] ? "https://image.tmdb.org/t/p/w500#{movie_details["poster_path"]}" : nil
 
-        # NEW: Get imdb_id safely
-        imdb_id = movie_details["imdb_id"]
+        # Get imdb_id from 'external_ids'
+        imdb_id = movie_details.dig("external_ids", "imdb_id")
         puts "IMDB ID: #{imdb_id}"
 
-        us_sources = []
+        # NEW: Fetch watch providers using TMDb API
+        watch_providers_url = URI("https://api.themoviedb.org/3/movie/#{movie_id}/watch/providers?api_key=#{tmdb_api_key}")
+        watch_providers_response = Net::HTTP.get(watch_providers_url)
+        watch_providers = JSON.parse(watch_providers_response)
 
-        # NEW: Check if imdb_id is present
-        if imdb_id.present?
-          watchmode_api_key = ENV['WATCHMODE_API_KEY']
-
-          # Search Watchmode for the movie to get the Watchmode title ID
-          search_url = URI("https://api.watchmode.com/v1/search/?apiKey=#{watchmode_api_key}&search_field=imdb_id&search_value=#{imdb_id}")
-          search_response = Net::HTTP.get(search_url)
-          search_results = JSON.parse(search_response)
-
-          if search_results["title_results"] && search_results["title_results"].any?
-            watchmode_title_id = search_results["title_results"].first["id"]
-
-            # Now fetch the streaming sources using the Watchmode title ID
-            watchmode_sources_url = URI("https://api.watchmode.com/v1/title/#{watchmode_title_id}/sources/?apiKey=#{watchmode_api_key}")
-            watchmode_sources_response = Net::HTTP.get(watchmode_sources_url)
-            watchmode_results = JSON.parse(watchmode_sources_response)
-
-            # Filter streaming availability for US region only
-            us_sources = watchmode_results.select do |source|
-              source["region"] == "US" && (source["type"] == "free" || source["type"] == "sub")
-            end
-          else
-            puts "No Watchmode title found for IMDB ID #{imdb_id}"
-          end
-        else
-          puts "IMDB ID is missing for movie #{movie_title}"
+        # NEW: Extract US streaming services
+        us_providers = watch_providers.dig("results", "US", "flatrate") || []
+        normalized_sources = us_providers.map do |provider|
+          streaming_service_mapping[provider["provider_id"].to_s] || "other"
         end
 
-        # NEW: Build movie data hash without saving to the database
+        # Build movie data hash without saving to the database
         movie_data = {
-          tmdb_id: movie_id,    # NEW: Use tmdb_id instead of id
-          imdb_id: imdb_id,     # NEW: Include imdb_id
+          tmdb_id: movie_id,
+          imdb_id: imdb_id,
           name: movie_title,
           description: movie_description,
           release_year: movie_release_date,
           director: movie_director,
           image_url: movie_poster_path,
-          streaming_sources: us_sources
+          streaming_services: normalized_sources.uniq # Use normalized_sources
         }
 
         # Add movie_data to movies array
@@ -123,40 +118,6 @@ class MoviesController < ApplicationController
       render json: { movies: movies }
     else
       render json: { error: "Movie not found or no results available" }, status: :not_found
-    end
-  end
-
-  # NEW: Endpoint to get streaming sources for a movie by imdb_id
-  def get_streaming_sources
-    imdb_id = params[:imdb_id]
-
-    if imdb_id.present?
-      watchmode_api_key = ENV['WATCHMODE_API_KEY']
-
-      # Search Watchmode for the movie to get the Watchmode title ID
-      search_url = URI("https://api.watchmode.com/v1/search/?apiKey=#{watchmode_api_key}&search_field=imdb_id&search_value=#{imdb_id}")
-      search_response = Net::HTTP.get(search_url)
-      search_results = JSON.parse(search_response)
-
-      if search_results["title_results"] && search_results["title_results"].any?
-        watchmode_title_id = search_results["title_results"].first["id"]
-
-        # Fetch the streaming sources using the Watchmode title ID
-        watchmode_sources_url = URI("https://api.watchmode.com/v1/title/#{watchmode_title_id}/sources/?apiKey=#{watchmode_api_key}")
-        watchmode_sources_response = Net::HTTP.get(watchmode_sources_url)
-        watchmode_results = JSON.parse(watchmode_sources_response)
-
-        # Filter streaming availability for US region only
-        us_sources = watchmode_results.select do |source|
-          source["region"] == "US" && (source["type"] == "free" || source["type"] == "sub")
-        end
-
-        render json: { streaming_sources: us_sources }
-      else
-        render json: { error: "No Watchmode title found for IMDB ID #{imdb_id}" }, status: :not_found
-      end
-    else
-      render json: { error: "IMDB ID is missing" }, status: :bad_request
     end
   end
 
