@@ -1,5 +1,5 @@
 json.id movie.id
-json.name movie.name
+json.title movie.title
 json.image_url movie.image_url
 json.description movie.description
 json.director movie.director

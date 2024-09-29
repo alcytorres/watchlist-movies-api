@@ -27,7 +27,7 @@ class MoviesController < ApplicationController
 
   def create
     @movie = Movie.create(
-      name: params[:name],
+      title: params[:title],
       image_url: params[:image_url],
       description: params[:description],
       director: params[:director],
@@ -102,7 +102,7 @@ class MoviesController < ApplicationController
         movie_data = {
           tmdb_id: movie_id,
           imdb_id: imdb_id,
-          name: movie_title,
+          title: movie_title,
           description: movie_description,
           release_year: movie_release_date,
           director: movie_director,
