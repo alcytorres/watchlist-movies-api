@@ -43,7 +43,7 @@ class MoviesController < ApplicationController
 
 
 
-  # NEW: Search for movies by title using only TMDb API
+  # Search for movies by title using only TMDb API
   def search_tmdb
     tmdb_api_key = ENV['TMDB_API_KEY']
     puts "TMDb API Key: #{tmdb_api_key}"
@@ -92,12 +92,12 @@ class MoviesController < ApplicationController
         imdb_id = movie_details.dig("external_ids", "imdb_id")
         puts "IMDB ID: #{imdb_id}"
 
-        # NEW: Fetch watch providers using TMDb API
+        # Fetch watch providers using TMDb API
         watch_providers_url = URI("https://api.themoviedb.org/3/movie/#{movie_id}/watch/providers?api_key=#{tmdb_api_key}")
         watch_providers_response = Net::HTTP.get(watch_providers_url)
         watch_providers = JSON.parse(watch_providers_response)
 
-        # NEW: Extract US streaming services
+        # Extract US streaming services
         us_providers = watch_providers.dig("results", "US", "flatrate") || []
         normalized_sources = us_providers.map do |provider|
           streaming_service_mapping[provider["provider_id"].to_s] || "other"
