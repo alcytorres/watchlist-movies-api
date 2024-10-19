@@ -1,7 +1,7 @@
 class MoviesController < ApplicationController
   require 'net/http'
 
-  # NEW: Skip CSRF verification for API requests
+  # Skip CSRF verification for API requests
   skip_before_action :verify_authenticity_token
 
   def index
@@ -37,6 +37,11 @@ class MoviesController < ApplicationController
     )
     render :show
   end
+
+
+  # The destroy action in this controller would typically be used to remove a movie from the entire database, not just from a user's watchlist. That is why there is no destroy action.
+
+
 
   # NEW: Search for movies by title using only TMDb API
   def search_tmdb
