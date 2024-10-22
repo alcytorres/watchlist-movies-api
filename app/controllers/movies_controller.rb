@@ -1,6 +1,9 @@
 class MoviesController < ApplicationController
   require 'net/http'
 
+
+  # Placeholder text
+
   # Skip CSRF verification for API requests
   skip_before_action :verify_authenticity_token
 
@@ -9,14 +12,14 @@ class MoviesController < ApplicationController
     p current_user
     p "current_user"
 
-    # Exclude movies that the current user has already favorited
-    @movies = Movie.where.not(id: current_user.favorite_movies.select(:movie_id))
+    # Get movies in the current user's Watchlist but not in their Favorites
+    @movies = current_user.movies_in_watchlist.where.not(id: current_user.favorite_movies.select(:movie_id))
 
     render :index
   end
 
   def user_movies
-    @movies = current_user.movies
+    @movies = current_user.movies_in_watchlist
     render :index
   end
 
@@ -33,10 +36,13 @@ class MoviesController < ApplicationController
       director: params[:director],
       release_year: params[:release_year],
       imdb_id: params[:imdb_id],
-      streaming_services: params[:streaming_services] # Include streaming_services
+      streaming_services: params[:streaming_services]
     )
     render :show
   end
+
+
+  # The association current_user.watchlist_movies fetches the actual Movie objects tied to the user's Watchlist, based on the through association defined in the User model.
 
 
   # The destroy action in this controller would typically be used to remove a movie from the entire database, not just from a user's watchlist. That is why there is no destroy action.

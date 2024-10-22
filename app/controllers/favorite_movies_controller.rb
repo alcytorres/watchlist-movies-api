@@ -1,8 +1,6 @@
 class FavoriteMoviesController < ApplicationController
 
   def index
-    # @favorite_movies = FavoriteMovie.all
-
      # Get the favorite movies for the current user
      @favorite_movies = current_user.favorite_movies.includes(:movie).map(&:movie)
 

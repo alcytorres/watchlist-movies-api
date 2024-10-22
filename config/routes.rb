@@ -14,7 +14,6 @@ Rails.application.routes.draw do
   post "/users" => "users#create"  # everyone
   post "/sessions" => "sessions#create"  # everyone
 
-
   get "/movies" => "movies#index"  # everyone
   get "/movies/:id" => "movies#show"  # everyone
   post "/movies" => "movies#create"  # logged in
@@ -30,7 +29,15 @@ Rails.application.routes.draw do
   delete "/favorite_movies/:id" => "favorite_movies#destroy"
 
 
-  # NEW: Route for the search_tmdb action
+  # Get current user's Watchlist
+  get "/watchlist_movies" => "watchlist_movies#index"
+  # Add movie to Watchlist
+  post "/watchlist_movies" => "watchlist_movies#create"
+  # Remove movie from Watchlist
+  delete "/watchlist_movies/:id" => "watchlist_movies#destroy"
+
+
+  # Route for the search_tmdb action
   get "/search_tmdb" => "movies#search_tmdb"
 
 

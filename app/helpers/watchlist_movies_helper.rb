@@ -1,0 +1,2 @@
+module WatchlistMoviesHelper
+end
