@@ -1,5 +1,3 @@
-# app/views/watchlist_movies/watchlist_movie.json.jbuilder
-
 json.id watchlist_movie.id
 json.user_id watchlist_movie.user_id
 json.movie do
