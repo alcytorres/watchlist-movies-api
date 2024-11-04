@@ -1,8 +1,6 @@
 class WatchlistMoviesController < ApplicationController
   # before_action :authenticate_user
 
-  # Placeholder text
-
   # Skip CSRF verification for API requests
   skip_before_action :verify_authenticity_token
 
@@ -13,7 +11,7 @@ class WatchlistMoviesController < ApplicationController
   end
 
   def create
-    # NEW: Find or create the movie without including the streaming_services in the WHERE clause
+    # Find or create the movie without including the streaming_services in the WHERE clause
     @movie = Movie.find_or_create_by(
       title: params[:title],
       image_url: params[:image_url],
@@ -22,18 +20,18 @@ class WatchlistMoviesController < ApplicationController
       release_year: params[:release_year],
       imdb_id: params[:imdb_id]
     ) do |movie|
-      # NEW: Assign the streaming_services after finding or creating the movie
+      # Assign the streaming_services after finding or creating the movie
       movie.streaming_services = params[:streaming_services]
     end
 
-    # NEW: Add movie to user's watchlist
+    # Add movie to user's watchlist
     @watchlist_movie = WatchlistMovie.find_or_create_by(
       user_id: current_user.id,
       movie_id: @movie.id,
     )
 
     if @watchlist_movie.persisted?
-      render "movies/show"  # Reuse movies/show.json.jbuilder
+      render "watchlist_movies/index", formats: :json
     else
       render json: { errors: @watchlist_movie.errors.full_messages }, status: :unprocessable_entity
     end
