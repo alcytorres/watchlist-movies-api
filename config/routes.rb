@@ -41,4 +41,8 @@ Rails.application.routes.draw do
   get "/search_tmdb" => "movies#search_tmdb"
 
 
+  # Route to get user's Watchlist and Favorites
+  get "/user_collections" => "watchlist_movies#user_collections"
+
+
 end

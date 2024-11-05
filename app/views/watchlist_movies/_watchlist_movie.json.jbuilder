@@ -1,5 +1,6 @@
 json.id watchlist_movie.id
 json.user_id watchlist_movie.user_id
+json.in_watchlist true  # Indicate movie is in watchlist
 json.movie do
   json.id watchlist_movie.movie.id
   json.title watchlist_movie.movie.title
