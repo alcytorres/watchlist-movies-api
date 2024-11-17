@@ -1,9 +1,6 @@
 class MoviesController < ApplicationController
   require 'net/http'
 
-
-  # Placeholder text
-
   # Skip CSRF verification for API requests
   skip_before_action :verify_authenticity_token
 
@@ -72,10 +69,9 @@ class MoviesController < ApplicationController
         "9" => "amazon",
         "337" => "disney",
         "350" => "apple",
-        "1899" => "max",      # For HBO Max
+        "1899" => "max",
         "15" => "hulu",
         "531" => "paramount",
-        # Add other mappings as needed
       }
 
       # Iterate over each movie result

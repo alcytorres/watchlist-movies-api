@@ -15,7 +15,7 @@ class Movie < ApplicationRecord
   validates :imdb_id, uniqueness: true  # Ensure uniqueness of IMDB ID
   validate :validate_streaming_services
 
-  # NEW: Ensure streaming services is a JSON array
+  # Ensure streaming services is a JSON array
   def validate_streaming_services
     unless streaming_services.is_a?(Array)
       errors.add(:streaming_services, "must be an array of services")

@@ -4,11 +4,7 @@ class WatchlistMoviesController < ApplicationController
   # Skip CSRF verification for API requests
   skip_before_action :verify_authenticity_token
 
-
-  # Placeholder text
-
-
-  # NEW: Fetch both Watchlist and Favorites for the current user
+  # Fetch both Watchlist and Favorites for the current user
   def user_collections
     @watchlist_movies = current_user.watchlist_movies.includes(:movie)
     @favorite_movies = current_user.favorite_movies.includes(:movie)
@@ -40,7 +36,7 @@ class WatchlistMoviesController < ApplicationController
       movie.streaming_services = params[:streaming_services]
     end
 
-    # NEW: Check if the movie is already in Favorites for the user
+    # Check if the movie is already in Favorites for the user
     if FavoriteMovie.exists?(user_id: current_user.id, movie_id: @movie.id)
       render json: { error: "This movie is already in Favorites and cannot be added to the Watchlist.", in_watchlist: false }
       return
