@@ -20,8 +20,14 @@ default: &default
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
 development:
-  <<: *default
-  database: capstone_favorite_movies_api_development
+  adapter: postgresql
+  encoding: unicode
+  database: Capstone_favorite_movies_api_development
+  pool: 5
+  username: alcy_studio
+  password:  # Leave blank if no password is set
+  host: localhost
+  port: 5432
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.
