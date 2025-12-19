@@ -44,5 +44,7 @@ Rails.application.routes.draw do
   # Route to get user's Watchlist and Favorites
   get "/user_collections" => "watchlist_movies#user_collections"
 
+  # Create movie recommendations
+  post "/recommendations" => "recommendations#create"
 
 end

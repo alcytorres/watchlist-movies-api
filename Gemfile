@@ -75,3 +75,5 @@ gem "rack-cors"
 # Load environmental variables in development and test environments
 gem 'dotenv-rails', groups: [:development, :test]
 
+# OpenAI API client for Ruby [https://github.com/alexrudall/ruby-openai]
+gem 'ruby-openai', '~> 7.0'
