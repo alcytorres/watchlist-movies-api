@@ -51,25 +51,26 @@ class RecommendationsController < ApplicationController
   def get_openai_recommendations(movie_titles)
     require 'openai'
 
-    client = OpenAI::Client.new(access_token: ENV['OPENAI_API_KEY'])
-
-    prompt = %Q{
-  Based on these favorite movies: #{movie_titles}
-
-  Suggest exactly 6 similar movies that the user might enjoy. For each movie, provide:
-  1. The exact movie title (must be a real, well-known movie)
-  2. A brief one-sentence explanation of why they might like it based on their favorites
-
-  Return ONLY a JSON array in this exact format:
-  [
-    {"title": "Movie Title", "explanation": "Why they'll like it"},
-    {"title": "Movie Title", "explanation": "Why they'll like it"}
-  ]
-
-  Do not include any other text, only the JSON array.
-  }
-
+    # Try OpenAI first
     begin
+      client = OpenAI::Client.new(access_token: ENV['OPENAI_API_KEY'])
+
+      prompt = %Q{
+Based on these favorite movies: #{movie_titles}
+
+Suggest exactly 6 similar movies that the user might enjoy. For each movie, provide:
+1. The exact movie title (must be a real, well-known movie)
+2. A brief one-sentence explanation of why they might like it based on their favorites
+
+Return ONLY a JSON array in this exact format:
+[
+  {"title": "Movie Title", "explanation": "Why they'll like it"},
+  {"title": "Movie Title", "explanation": "Why they'll like it"}
+]
+
+Do not include any other text, only the JSON array.
+}
+
       response = client.chat(
         parameters: {
           model: "gpt-3.5-turbo",
@@ -90,8 +91,66 @@ class RecommendationsController < ApplicationController
 
       { movies: movies }
     rescue => e
-      { error: "Failed to get recommendations: #{e.message}" }
+      # Log the error for debugging
+      puts "OpenAI Error: #{e.message}"
+      puts "Error class: #{e.class}"
+
+      # Fallback to TMDb if OpenAI fails (rate limit, no credits, etc.)
+      if e.message.include?("429") || e.message.include?("rate limit") || e.message.include?("insufficient_quota") || e.message.include?("401")
+        puts "Falling back to TMDb recommendations"
+        return get_tmdb_recommendations_fallback(movie_titles)
+      else
+        puts "OpenAI failed with error: #{e.message}"
+        return { error: "Failed to get recommendations: #{e.message}" }
+      end
     end
+  end
+
+  def get_tmdb_recommendations_fallback(movie_titles)
+    # Parse movie titles from the string
+    titles = movie_titles.split(", ").map(&:strip)
+    tmdb_api_key = ENV['TMDB_API_KEY']
+    all_recommendations = []
+
+    # Get recommendations from TMDb for each favorite
+    titles.each do |title|
+      begin
+        # Search for the movie
+        search_url = URI("https://api.themoviedb.org/3/search/movie?api_key=#{tmdb_api_key}&query=#{URI.encode_www_form_component(title)}")
+        search_response = Net::HTTP.get(search_url)
+        search_results = JSON.parse(search_response)
+
+        if search_results["results"] && search_results["results"].any?
+          tmdb_id = search_results["results"][0]["id"]
+
+          # Get recommendations from TMDb
+          rec_url = URI("https://api.themoviedb.org/3/movie/#{tmdb_id}/recommendations?api_key=#{tmdb_api_key}")
+          rec_response = Net::HTTP.get(rec_url)
+          rec_results = JSON.parse(rec_response)
+
+          if rec_results["results"] && rec_results["results"].any?
+            # Get top 2-3 recommendations from each movie
+            all_recommendations.concat(rec_results["results"].first(3))
+          end
+        end
+      rescue => e
+        # Skip if this movie fails, continue with others
+        next
+      end
+    end
+
+    # Deduplicate by TMDb ID and limit to 6
+    unique_recommendations = all_recommendations.uniq { |m| m["id"] }.first(6)
+
+    # Format like OpenAI response with explanation text
+    movies = unique_recommendations.map do |movie|
+      {
+        "title" => movie["title"],
+        "explanation" => "Similar to your favorite movies - recommended based on TMDb's algorithm"
+      }
+    end
+
+    { movies: movies }
   end
 
   def fetch_movie_details(recommendations)
@@ -100,6 +159,7 @@ class RecommendationsController < ApplicationController
 
     recommendations.each do |rec|
       movie_title = rec["title"]
+      original_explanation = rec["explanation"] # Preserve the AI explanation
 
       # Search TMDb for the movie
       search_url = URI("https://api.themoviedb.org/3/search/movie?api_key=#{tmdb_api_key}&query=#{URI.encode_www_form_component(movie_title)}")
@@ -137,17 +197,17 @@ class RecommendationsController < ApplicationController
           streaming_service_mapping[provider["provider_id"].to_s] || "other"
         end
 
-        # Build movie data
+        # Build movie data - use original explanation from OpenAI
         movie_data = {
           tmdb_id: tmdb_id,
           title: movie_details["title"] || movie_title,
-          description: movie_details["overview"] || rec["explanation"],
+          description: movie_details["overview"] || original_explanation,
           director: movie_details.dig("credits", "crew")&.find { |person| person["job"] == "Director" }&.[]("name") || "Unknown Director",
           release_year: movie_details["release_date"] ? movie_details["release_date"].split("-")[0] : "Unknown Year",
           image_url: movie_details["poster_path"] ? "https://image.tmdb.org/t/p/w500#{movie_details["poster_path"]}" : nil,
           imdb_id: movie_details.dig("external_ids", "imdb_id"),
           streaming_services: normalized_sources.uniq,
-          explanation: rec["explanation"] || "Similar to your favorites"
+          explanation: original_explanation || "Similar to your favorites"
         }
 
         full_recommendations << movie_data
@@ -157,4 +217,3 @@ class RecommendationsController < ApplicationController
     full_recommendations
   end
 end
-
