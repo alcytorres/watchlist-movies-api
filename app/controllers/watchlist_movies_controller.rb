@@ -23,17 +23,25 @@ class WatchlistMoviesController < ApplicationController
   end
 
   def create
-    # Find or create the movie without including the streaming_services in the WHERE clause
-    @movie = Movie.find_or_create_by(
-      title: params[:title],
-      image_url: params[:image_url],
-      description: params[:description],
-      director: params[:director],
-      release_year: params[:release_year],
-      imdb_id: params[:imdb_id]
-    ) do |movie|
-      # Assign the streaming_services after finding or creating the movie
-      movie.streaming_services = params[:streaming_services]
+    # Look up by imdb_id only — matching on all fields fails when TMDb data
+    # differs slightly from an existing record (then create hits imdb_id uniqueness)
+    @movie = Movie.find_by(imdb_id: params[:imdb_id])
+
+    unless @movie
+      @movie = Movie.create(
+        title: params[:title],
+        image_url: params[:image_url],
+        description: params[:description],
+        director: params[:director],
+        release_year: params[:release_year],
+        imdb_id: params[:imdb_id],
+        streaming_services: params[:streaming_services] || []
+      )
+    end
+
+    unless @movie.persisted?
+      render json: { errors: @movie.errors.full_messages }, status: :unprocessable_entity
+      return
     end
 
     # Check if the movie is already in Favorites for the user
