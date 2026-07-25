@@ -3,6 +3,7 @@ class MoviesController < ApplicationController
 
   # Skip CSRF verification for API requests
   skip_before_action :verify_authenticity_token
+  before_action :authenticate_user, only: [:index, :user_movies, :create, :search_tmdb]
 
   def index
     p "current_user"

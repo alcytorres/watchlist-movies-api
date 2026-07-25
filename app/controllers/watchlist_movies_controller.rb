@@ -1,5 +1,5 @@
 class WatchlistMoviesController < ApplicationController
-  # before_action :authenticate_user
+  before_action :authenticate_user
 
   # Skip CSRF verification for API requests
   skip_before_action :verify_authenticity_token

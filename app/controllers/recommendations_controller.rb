@@ -3,6 +3,7 @@ class RecommendationsController < ApplicationController
   require 'json'
 
   skip_before_action :verify_authenticity_token
+  before_action :authenticate_user
 
   def create
     # Get selected movie IDs from params
