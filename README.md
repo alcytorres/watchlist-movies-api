@@ -116,6 +116,29 @@
     - Only the titles file changes each time — the import script stays the same
     - Use clear titles (e.g. "The Hangover") so TMDb can find the right movie
 
+# Bulk Import Watchlist (from a list of titles)
+  Same idea as Favorites, but adds movies to your Watchlist instead.
+
+  What it does:
+    - Reads movie titles from `tmp/watchlist_titles.txt`
+    - Looks each title up on TMDb
+    - Creates the movie in the database if needed
+    - Adds it to the Watchlist for user id 1 (Luke Skywalker / luke@email.com)
+    - Skips titles that are already on the Watchlist
+    - Skips titles that are already in Favorites (Watchlist and Favorites stay mutually exclusive)
+
+  How to use:
+    1. Open `tmp/watchlist_titles.txt`
+    2. Put one movie title per line (replace any old titles)
+    3. From the backend directory, run:
+         bundle exec rails runner tmp/import_watchlist.rb
+    4. Refresh the Watchlist page in the browser to see the new movies
+
+  Notes:
+    - Requires `TMDB_API_KEY` in your `.env` file
+    - Only the titles file changes each time — the import script stays the same
+    - Use clear titles so TMDb can find the right movie
+
 # Key Features 
   - User Authentication and Authorization: Secure user registration and login using JWT.
   - Search for Movies: Search for movies using the TMDb API.
@@ -126,6 +149,7 @@
   - View Movie Details: Access detailed information about movies, including synopsis, director, release year, and the poster.
   - Filter Movies: Filter favorites and watchlist by release year and streaming service.
   - Bulk Import Favorites: Import many favorites at once from a titles list using `tmp/import_favorites.rb`.
+  - Bulk Import Watchlist: Import many watchlist movies at once from a titles list using `tmp/import_watchlist.rb`.
 
 # Additional Configuration
   - Environment Variables: Ensure that sensitive information such as API keys (TMDb and OpenAI) are stored in environment variables and not committed to version control.
