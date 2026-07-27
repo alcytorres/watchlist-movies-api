@@ -17,14 +17,22 @@ class FavoriteMoviesController < ApplicationController
       return
     end
 
+    existing = FavoriteMovie.find_by(user_id: current_user.id, movie_id: movie.id)
+
+    # Toggle: if already favorited, remove it (same pattern as Watchlist create)
+    if existing
+      existing.destroy
+      render json: { message: "Removed from Favorites", in_favorites: false }
+      return
+    end
+
     # Watchlist and Favorites are mutually exclusive: drop it from the Watchlist if present.
     WatchlistMovie.where(user_id: current_user.id, movie_id: movie.id).destroy_all
 
-    # Reuse an existing favorite if the user already favorited this movie.
-    @favorite_movie = FavoriteMovie.find_or_initialize_by(user_id: current_user.id, movie_id: movie.id)
+    @favorite_movie = FavoriteMovie.create(user_id: current_user.id, movie_id: movie.id)
 
-    if @favorite_movie.persisted? || @favorite_movie.save
-      render "favorite_movies/show"  # Use JBuilder template
+    if @favorite_movie.persisted?
+      render "favorite_movies/show"  # includes in_favorites: true
     else
       render json: { errors: @favorite_movie.errors.full_messages }, status: :unprocessable_entity
     end

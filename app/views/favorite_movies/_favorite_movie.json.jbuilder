@@ -12,3 +12,4 @@ json.movie do
 end
 json.created_at favorite_movie.created_at
 json.updated_at favorite_movie.updated_at
+json.in_favorites true
