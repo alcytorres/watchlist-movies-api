@@ -45,9 +45,30 @@ class RecommendationsController < ApplicationController
       recommendations: full_recommendations,
       based_on: selected_favorites.map { |fm| { id: fm.movie.id, title: fm.movie.title } }
     }
+  rescue => e
+    puts "Recommendations error: #{e.class} - #{e.message}"
+    render json: { error: "Couldn't reach the movie service. Please try again in a moment." }, status: :internal_server_error
   end
 
   private
+
+  # GET a TMDb URL with short timeouts so a slow/unreachable API can't hang the request.
+  # Force IPv4: this machine's IPv6 route to TMDb is a black hole, so Net::HTTP hangs
+  # on connect unless we pin to the IPv4 address (curl works because it falls back).
+  def tmdb_get(url)
+    require 'socket'
+    uri = url.is_a?(URI) ? url : URI(url)
+    ipv4 = Socket.getaddrinfo(uri.host, uri.port, Socket::AF_INET, Socket::SOCK_STREAM).first[3]
+
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = (uri.scheme == "https")
+    http.ipaddr = ipv4
+    http.open_timeout = 5
+    http.read_timeout = 8
+    http.start do |conn|
+      conn.get(uri.request_uri).body
+    end
+  end
 
   def get_openai_recommendations(movie_titles)
     require 'openai'
@@ -159,12 +180,13 @@ Do not include any other text, only the JSON array.
     full_recommendations = []
 
     recommendations.each do |rec|
+      begin
       movie_title = rec["title"]
       original_explanation = rec["explanation"] # Preserve the AI explanation
 
       # Search TMDb for the movie
       search_url = URI("https://api.themoviedb.org/3/search/movie?api_key=#{tmdb_api_key}&query=#{URI.encode_www_form_component(movie_title)}")
-      search_response = Net::HTTP.get(search_url)
+      search_response = tmdb_get(search_url)
       search_results = JSON.parse(search_response)
 
       if search_results["results"] && search_results["results"].any?
@@ -174,12 +196,12 @@ Do not include any other text, only the JSON array.
 
         # Fetch full movie details
         movie_details_url = URI("https://api.themoviedb.org/3/movie/#{tmdb_id}?api_key=#{tmdb_api_key}&append_to_response=credits,external_ids")
-        movie_details_response = Net::HTTP.get(movie_details_url)
+        movie_details_response = tmdb_get(movie_details_url)
         movie_details = JSON.parse(movie_details_response)
 
         # Get streaming providers
         watch_providers_url = URI("https://api.themoviedb.org/3/movie/#{tmdb_id}/watch/providers?api_key=#{tmdb_api_key}")
-        watch_providers_response = Net::HTTP.get(watch_providers_url)
+        watch_providers_response = tmdb_get(watch_providers_url)
         watch_providers = JSON.parse(watch_providers_response)
 
         # Extract US streaming services
@@ -212,6 +234,11 @@ Do not include any other text, only the JSON array.
         }
 
         full_recommendations << movie_data
+      end
+      rescue => e
+        # Skip this recommendation if its TMDb lookup fails, keep the rest
+        puts "Skipping '#{rec["title"]}': #{e.class} - #{e.message}"
+        next
       end
     end
 
