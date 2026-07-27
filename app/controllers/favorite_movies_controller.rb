@@ -8,46 +8,57 @@ class FavoriteMoviesController < ApplicationController
   end
 
   def create
-    # Check if the movie is in the user's Watchlist
-    @watchlist_movie = WatchlistMovie.find_by(user_id: current_user.id, movie_id: params[:movie_id])
-    if @watchlist_movie
-      # Remove from Watchlist
-      @watchlist_movie.destroy
+    # Resolve the movie from either an existing movie_id (Watchlist flow) or the
+    # raw TMDb data sent from the search page (find-or-create by imdb_id).
+    movie = resolve_movie
 
-      # Add to Favorites
-      @favorite_movie = FavoriteMovie.create(
-        user_id: current_user.id,
-        movie_id: params[:movie_id],
-      )
+    unless movie&.persisted?
+      render json: { error: "Movie could not be found or created" }, status: :unprocessable_entity
+      return
+    end
 
-      if @favorite_movie.persisted?
-        render "favorite_movies/show"  # Use JBuilder template
-      else
-        render json: { errors: @favorite_movie.errors.full_messages }, status: :unprocessable_entity
-      end
+    # Watchlist and Favorites are mutually exclusive: drop it from the Watchlist if present.
+    WatchlistMovie.where(user_id: current_user.id, movie_id: movie.id).destroy_all
+
+    # Reuse an existing favorite if the user already favorited this movie.
+    @favorite_movie = FavoriteMovie.find_or_initialize_by(user_id: current_user.id, movie_id: movie.id)
+
+    if @favorite_movie.persisted? || @favorite_movie.save
+      render "favorite_movies/show"  # Use JBuilder template
     else
-      render json: { error: "Movie must be in Watchlist before adding to Favorites" }, status: :unprocessable_entity
+      render json: { errors: @favorite_movie.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def destroy
     @favorite_movie = FavoriteMovie.find_by(id: params[:id], user_id: current_user.id)
     if @favorite_movie
-      # Get the movie ID before destroying
-      movie_id = @favorite_movie.movie_id
-
-      # Remove from Favorites
+      # Remove from Favorites only. We no longer auto-add back to the Watchlist,
+      # since movies can now be favorited directly (and may never have been on it).
       @favorite_movie.destroy
 
-      # Add back to Watchlist
-      @watchlist_movie = WatchlistMovie.create(
-        user_id: current_user.id,
-        movie_id: movie_id,
-      )
-
-      render json: { message: "Favorite Movie removed and added back to Watchlist" }
+      render json: { message: "Favorite Movie removed" }
     else
       render json: { error: "Favorite Movie not found" }, status: :not_found
+    end
+  end
+
+  private
+
+  def resolve_movie
+    if params[:movie_id].present?
+      Movie.find_by(id: params[:movie_id])
+    elsif params[:imdb_id].present?
+      # Look up by imdb_id only (same approach as the Watchlist controller)
+      Movie.find_by(imdb_id: params[:imdb_id]) || Movie.create(
+        title: params[:title],
+        image_url: params[:image_url],
+        description: params[:description],
+        director: params[:director],
+        release_year: params[:release_year],
+        imdb_id: params[:imdb_id],
+        streaming_services: params[:streaming_services] || []
+      )
     end
   end
 end
