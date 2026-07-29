@@ -1,161 +1,61 @@
-# README
+# Watchlist Movies API
 
-# Watchlist Movies App
+The Rails API for a full-stack movie app to search films, see where to stream them, build a watchlist and favorites, and get AI-powered recommendations.
 
 ![App demo](https://raw.githubusercontent.com/alcytorres/capstone-favorite-movies-frontend/main/demo.gif)
 
-# Description
-  A full-stack movie discovery and tracking app that lets users sign up, search for movies, view detailed information (including where to stream), and curate personal watchlists and favorites.
+## What It Does
+Powers user auth, TMDb movie and streaming data, personal watchlists and favorites, and OpenAI-based recommendations. A user picks a few favorites and the engine returns personalized suggestions with short explanations — a Netflix-style discovery experience.
 
-  Built with Ruby on Rails as a API backend and React for a responsive frontend, the app integrates the TMDb API to provide real-time movie data and streaming availability.
+## Tech Stack
+- **Backend:** Ruby on Rails, PostgreSQL, JWT, Dotenv
+- **Frontend:** React, React Router, Axios, Bootstrap
+- **APIs:** TMDb (movie/streaming data), OpenAI (recommendations)
 
-  The highlight is an AI-powered recommendation engine powered by OpenAI. By analyzing a user's selected favorites, it generates personalized movie suggestions complete with thoughtful explanations bringing an intelligent, Netflix like discovery experience to the app.
+## Features
+- Secure sign up / log in (JWT)
+- Movie search with details and streaming availability
+- Watchlist and favorites endpoints (add, view, remove)
+- Filter and sort user lists by release year and streaming service
+- AI recommendations from 2–6 selected favorites (falls back to TMDb if OpenAI is unavailable)
+- Bulk import scripts for favorites and watchlist (see below)
 
-  With a clean, intuitive interface, users can easily organize films they love, plan what to watch next, and discover new titles tailored to their preferences.
+## Related Repo
+This is the **Rails API**. The **React frontend** (with a demo GIF) lives here: [capstone-favorite-movies-frontend](https://github.com/alcytorres/capstone-favorite-movies-frontend).
+You need both running to use the app.
 
-# Getting Started
-  These instructions will get you a copy of the project up and running on your local machine.
+## Getting Started
+Requires Ruby 3.2.2, Rails 7.1.3.4, and PostgreSQL. You also need a [TMDb API key](https://developer.themoviedb.org/docs/getting-started) and an [OpenAI API key](https://platform.openai.com/api-keys).
 
-# Prerequisites
-  Before you begin, ensure you have met the following requirements:
-    Backend
-      - Ruby version: 3.2.2
-      - Rails version: 7.1.3.4
-      - PostgreSQL
-      - TMDb API Key: Obtain an API key from TMDb: https://developer.themoviedb.org/docs/getting-started#:~:text=To%20register%20for%20an%20API,to%20our%20terms%20of%20use
-      - OpenAI API Key: Obtain an API key from OpenAI: https://platform.openai.com/api-keys (Required for movie recommendations)
-    Frontend
-      - Node.js version: v22.2.0
-      - npm: 10.7.0
+```bash
+git clone https://github.com/alcytorres/capstone-favorite-movies-api.git
+cd capstone-favorite-movies-api
+bundle install
+rails db:setup
+```
 
-# Technologies Used
-  Backend
-    - Ruby on Rails
-    - PostgreSQL
-    - TMDb API (The Movie Database API)
-    - OpenAI API (for AI-powered movie recommendations)
-    - Dotenv (for environment variables)
-    - JWT (for authentication)
+Create a `.env` in the project root:
 
-  Frontend
-    - React
-    - Axios
-    - Bootstrap
-    - React Router
+```
+TMDB_API_KEY=your_tmdb_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
+```
 
-# Backend Installation
-  1. Clone the backend (Ruby on Rails) repository:
-       git clone https://github.com/alcytorres/capstone-favorite-movies-api.git
+Start the server with `rails server`. Then start the [frontend](https://github.com/alcytorres/capstone-favorite-movies-frontend).
 
-  2. Navigate to the backend directory:
-       cd capstone-favorite-movies-api
+**Notes:** Keep API keys in `.env` (never commit them), and configure CORS so the frontend can call the API.
 
-  3. Install dependencies:
-       bundle install
+## Bulk Import (optional)
+Add many movies at once from a list of titles instead of searching one by one.
 
-  4. Set up the database:
-       rails db:setup
+**Favorites:** put one title per line in `tmp/favorite_titles.txt`, then run:
+```bash
+bundle exec rails runner tmp/import_favorites.rb
+```
 
-  5. Obtain API Keys:
-       - TMDb API Key: Sign up at TMDb to obtain an API key.
-       - OpenAI API Key: Sign up at OpenAI to obtain an API key for movie recommendations.
+**Watchlist:** put one title per line in `tmp/watchlist_titles.txt`, then run:
+```bash
+bundle exec rails runner tmp/import_watchlist.rb
+```
 
-  6. Configure API Keys:
-       Create a .env file in the root directory of the backend project.
-       Add your API keys to the .env file:
-
-       TMDB_API_KEY=your_tmdb_api_key_here
-       OPENAI_API_KEY=your_openai_api_key_here
-
-       Ensure the dotenv-rails gem is installed to load environment variables from .env.
-
-# To start the Rails server:
-  cd capstone-favorite-movies-api
-    rails server
-
-# Frontend Installation
-  1. Clone the frontend (JavaScript using the React framework) repository:
-       git clone https://github.com/alcytorres/capstone-favorite-movies-frontend.git
-
-  2. Navigate to the frontend directory:
-       cd capstone-favorite-movies-frontend
-
-  3. Install dependencies:
-       npm install
-
-# To start the React development server:
-    cd capstone-favorite-movies-frontend
-      npm run dev
-
-# Usage
-  1. Create an account or log in.
-  2. Use the search feature to find movies.
-  3. Add movies to your watchlist or favorites.
-  4. View detailed information about movies, including streaming availability.
-  5. View and manage your list of favorite movies and watchlist.
-  6. Get AI-powered recommendations: Select 2-6 favorite movies and receive personalized movie recommendations with explanations.
-  7. Remove movies from your favorites or watchlist.
-
-# Bulk Import Favorites (from a list of titles)
-  Use this when you want to add many movies to Favorites at once (for example from a spreadsheet), instead of searching one by one.
-
-  What it does:
-    - Reads movie titles from `tmp/favorite_titles.txt`
-    - Looks each title up on TMDb
-    - Creates the movie in the database if needed
-    - Adds it to Favorites for user id 1 (Luke Skywalker / luke@email.com)
-    - Skips titles that are already in Favorites
-
-  How to use:
-    1. Open `tmp/favorite_titles.txt`
-    2. Put one movie title per line (replace any old titles)
-    3. From the backend directory, run:
-         bundle exec rails runner tmp/import_favorites.rb
-    4. Refresh the Favorites page in the browser to see the new movies
-
-  Notes:
-    - Requires `TMDB_API_KEY` in your `.env` file
-    - Only the titles file changes each time — the import script stays the same
-    - Use clear titles (e.g. "The Hangover") so TMDb can find the right movie
-
-# Bulk Import Watchlist (from a list of titles)
-  Same idea as Favorites, but adds movies to your Watchlist instead.
-
-  What it does:
-    - Reads movie titles from `tmp/watchlist_titles.txt`
-    - Looks each title up on TMDb
-    - Creates the movie in the database if needed
-    - Adds it to the Watchlist for user id 1 (Luke Skywalker / luke@email.com)
-    - Skips titles that are already on the Watchlist
-    - Skips titles that are already in Favorites (Watchlist and Favorites stay mutually exclusive)
-
-  How to use:
-    1. Open `tmp/watchlist_titles.txt`
-    2. Put one movie title per line (replace any old titles)
-    3. From the backend directory, run:
-         bundle exec rails runner tmp/import_watchlist.rb
-    4. Refresh the Watchlist page in the browser to see the new movies
-
-  Notes:
-    - Requires `TMDB_API_KEY` in your `.env` file
-    - Only the titles file changes each time — the import script stays the same
-    - Use clear titles so TMDb can find the right movie
-
-# Key Features 
-  - User Authentication and Authorization: Secure user registration and login using JWT.
-  - Search for Movies: Search for movies using the TMDb API.
-  - Fetch Streaming Data: Retrieve streaming availability and other movie details from TMDb.
-  - AI-Powered Movie Recommendations: Get personalized movie recommendations based on your favorite movies using OpenAI's API. The system analyzes your preferences and suggests similar movies with personalized explanations.
-  - Add Movies to Watchlist and Favorites: Save movies to your favorites list or watchlist.
-  - Manage Favorites and Watchlist: View and remove movies from your favorites and watchlist.
-  - View Movie Details: Access detailed information about movies, including synopsis, director, release year, and the poster.
-  - Filter Movies: Filter favorites and watchlist by release year and streaming service.
-  - Bulk Import Favorites: Import many favorites at once from a titles list using `tmp/import_favorites.rb`.
-  - Bulk Import Watchlist: Import many watchlist movies at once from a titles list using `tmp/import_watchlist.rb`.
-
-# Additional Configuration
-  - Environment Variables: Ensure that sensitive information such as API keys (TMDb and OpenAI) are stored in environment variables and not committed to version control.
-  
-  - CORS Configuration: Configure Cross-Origin Resource Sharing (CORS) in your Rails backend to allow requests from your frontend.
-
-  - OpenAI API: The app uses OpenAI's GPT-3.5-turbo model for generating personalized movie recommendations. If OpenAI API is unavailable or rate-limited, the system automatically falls back to TMDb's recommendation algorithm.
+Each script looks titles up on TMDb, creates the movie if needed, and adds it for user id 1 (Luke Skywalker / luke@email.com). It skips duplicates, and watchlist/favorites stay mutually exclusive. Requires `TMDB_API_KEY` in `.env`; use clear titles (e.g. "The Hangover") so TMDb finds the right movie.
