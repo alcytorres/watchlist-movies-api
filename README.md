@@ -5,7 +5,7 @@ The backend for a full-stack movie app to search films, see where to stream them
 ![App demo](https://raw.githubusercontent.com/alcytorres/capstone-favorite-movies-frontend/main/demo.gif)
 
 ## What It Does
-Powers user auth, TMDb movie and streaming data, personal watchlists and favorites, and OpenAI-based recommendations. A user picks a few favorites and the engine returns personalized suggestions with short explanations, similar to Netflix recommendations.
+Search the TMDb catalog and view details like streaming availability. Save movies to your watchlist or favorites, then filter and sort them. Pick a few favorite movies, and the app uses OpenAI to recommend similar films and explain why they're a good match.
 
 ## Tech Stack
 - **Backend:** Ruby on Rails, PostgreSQL, JWT, Dotenv
