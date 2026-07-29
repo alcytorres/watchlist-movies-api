@@ -1,6 +1,6 @@
 # Watchlist Movies API
 
-The Rails API for a full-stack movie app to search films, see where to stream them, build a watchlist and favorites, and get AI-powered recommendations.
+The backend for a full-stack movie app to search films, see where to stream them, build a watchlist and favorites, and get AI-powered recommendations.
 
 ![App demo](https://raw.githubusercontent.com/alcytorres/capstone-favorite-movies-frontend/main/demo.gif)
 
@@ -21,7 +21,7 @@ Powers user auth, TMDb movie and streaming data, personal watchlists and favorit
 - Bulk import scripts for favorites and watchlist (see below)
 
 ## Related Repo
-This is the **Rails API**. The **React frontend** (with a demo GIF) lives here: [capstone-favorite-movies-frontend](https://github.com/alcytorres/capstone-favorite-movies-frontend).
+This is the **Rails API backend**. The **React frontend** (with a demo GIF) lives here: [capstone-favorite-movies-frontend](https://github.com/alcytorres/capstone-favorite-movies-frontend).
 You need both running to use the app.
 
 ## Getting Started
@@ -58,4 +58,8 @@ bundle exec rails runner tmp/import_favorites.rb
 bundle exec rails runner tmp/import_watchlist.rb
 ```
 
-Each script looks titles up on TMDb, creates the movie if needed, and adds it for the user set by `USER_ID` in the script (default: `1`). Sign up in the app, then set `USER_ID` in `tmp/import_favorites.rb` / `tmp/import_watchlist.rb` to that user's id. It skips duplicates, and watchlist/favorites stay mutually exclusive. Requires `TMDB_API_KEY` in `.env`; use clear titles (e.g. "The Godfather") so TMDb finds the right movie.
+Each script looks titles up on TMDb, creates the movie if needed, and adds it for the user in `USER_ID` (default: `1`). On a fresh setup, the first account you create is usually `1`, so you often don't need to change it. If you have multiple users, list them with:
+```bash
+bin/rails runner 'User.all.each { |u| puts "#{u.id}: #{u.email}" }'
+```
+then update `USER_ID` in the import scripts. Skips duplicates; watchlist/favorites stay mutually exclusive. Requires `TMDB_API_KEY` in `.env`; use clear titles (e.g. "The Godfather") so TMDb finds the right movie.
