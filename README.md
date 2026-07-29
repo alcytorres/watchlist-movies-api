@@ -5,7 +5,7 @@ The Rails API for a full-stack movie app to search films, see where to stream th
 ![App demo](https://raw.githubusercontent.com/alcytorres/capstone-favorite-movies-frontend/main/demo.gif)
 
 ## What It Does
-Powers user auth, TMDb movie and streaming data, personal watchlists and favorites, and OpenAI-based recommendations. A user picks a few favorites and the engine returns personalized suggestions with short explanations — a Netflix-style discovery experience.
+Powers user auth, TMDb movie and streaming data, personal watchlists and favorites, and OpenAI-based recommendations. A user picks a few favorites and the engine returns personalized suggestions with short explanations, similar to Netflix recommendations.
 
 ## Tech Stack
 - **Backend:** Ruby on Rails, PostgreSQL, JWT, Dotenv
@@ -58,4 +58,4 @@ bundle exec rails runner tmp/import_favorites.rb
 bundle exec rails runner tmp/import_watchlist.rb
 ```
 
-Each script looks titles up on TMDb, creates the movie if needed, and adds it for user id 1 (Luke Skywalker / luke@email.com). It skips duplicates, and watchlist/favorites stay mutually exclusive. Requires `TMDB_API_KEY` in `.env`; use clear titles (e.g. "The Hangover") so TMDb finds the right movie.
+Each script looks titles up on TMDb, creates the movie if needed, and adds it for the user set by `USER_ID` in the script (default: `1`). Sign up in the app, then set `USER_ID` in `tmp/import_favorites.rb` / `tmp/import_watchlist.rb` to that user's id. It skips duplicates, and watchlist/favorites stay mutually exclusive. Requires `TMDB_API_KEY` in `.env`; use clear titles (e.g. "The Godfather") so TMDb finds the right movie.
