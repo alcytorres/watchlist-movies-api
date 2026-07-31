@@ -50,7 +50,6 @@ class MoviesController < ApplicationController
   # Search for movies by title using only TMDb API
   def search_tmdb
     tmdb_api_key = ENV['TMDB_API_KEY']
-    puts "TMDb API Key: #{tmdb_api_key}"
 
     query = params[:query]
 

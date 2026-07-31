@@ -2,7 +2,7 @@
 
 The backend for a full-stack movie app to search films, see where to stream them, build a watchlist and favorites, and get AI-powered recommendations.
 
-![App demo](https://raw.githubusercontent.com/alcytorres/capstone-favorite-movies-frontend/main/demo.gif)
+![App demo](https://raw.githubusercontent.com/alcytorres/watchlist-movies-frontend/main/demo.gif)
 
 ## What It Does
 Search the TMDb catalog and view details like streaming availability. Save movies to your watchlist or favorites, then filter and sort them. Pick a few favorite movies, and the app uses OpenAI to recommend similar films and explain why they're a good match.
@@ -21,15 +21,15 @@ Search the TMDb catalog and view details like streaming availability. Save movie
 - Bulk import scripts for favorites and watchlist (see below)
 
 ## Related Repo
-This is the **Rails API backend**. The **React frontend** (with a demo GIF) lives here: [capstone-favorite-movies-frontend](https://github.com/alcytorres/capstone-favorite-movies-frontend).
+This is the **Rails API backend**. The **React frontend** (with a demo GIF) lives here: [watchlist-movies-frontend](https://github.com/alcytorres/watchlist-movies-frontend).
 You need both running to use the app.
 
 ## Getting Started
 Requires Ruby 3.2.2, Rails 7.1.3.4, and PostgreSQL. You also need a [TMDb API key](https://developer.themoviedb.org/docs/getting-started) and an [OpenAI API key](https://platform.openai.com/api-keys).
 
 ```bash
-git clone https://github.com/alcytorres/capstone-favorite-movies-api.git
-cd capstone-favorite-movies-api
+git clone https://github.com/alcytorres/watchlist-movies-api.git
+cd watchlist-movies-api
 bundle install
 rails db:setup
 ```
@@ -41,7 +41,7 @@ TMDB_API_KEY=your_tmdb_api_key_here
 OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-Start the server with `rails server`. Then start the [frontend](https://github.com/alcytorres/capstone-favorite-movies-frontend).
+Start the server with `rails server`. Then start the [frontend](https://github.com/alcytorres/watchlist-movies-frontend).
 
 **Notes:** Keep API keys in `.env` (never commit them), and configure CORS so the frontend can call the API.
 
