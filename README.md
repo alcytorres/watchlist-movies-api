@@ -43,7 +43,7 @@ OPENAI_API_KEY=your_openai_api_key_here
 
 Start the server with `rails server`. Then start the [frontend](https://github.com/alcytorres/watchlist-movies-frontend).
 
-**Notes:** Keep API keys in `.env` (never commit them), and configure CORS so the frontend can call the API.
+**Notes:** Keep API keys in `.env` (never commit them), and configure CORS so the frontend can call the API. In `config/database.yml`, the development `username` is set to this machine’s Postgres user — change it to yours if `rails db:setup` fails.
 
 ## Bulk Import (optional)
 Add many movies at once from a list of titles instead of searching one by one.
