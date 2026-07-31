@@ -50,16 +50,16 @@ Add many movies at once from a list of titles instead of searching one by one.
 
 **Favorites:** put one title per line in `tmp/favorite_titles.txt`, then run:
 ```bash
-bundle exec rails runner tmp/import_favorites.rb
+bundle exec rails runner script/import_favorites.rb
 ```
 
 **Watchlist:** put one title per line in `tmp/watchlist_titles.txt`, then run:
 ```bash
-bundle exec rails runner tmp/import_watchlist.rb
+bundle exec rails runner script/import_watchlist.rb
 ```
 
 Each script looks titles up on TMDb, creates the movie if needed, and adds it for the user in `USER_ID` (default: `1`). On a fresh setup, the first account you create is usually `1`, so you often don't need to change it. If you have multiple users, list them with:
 ```bash
 bin/rails runner 'User.all.each { |u| puts "#{u.id}: #{u.email}" }'
 ```
-then update `USER_ID` in the import scripts. Skips duplicates; watchlist/favorites stay mutually exclusive. Requires `TMDB_API_KEY` in `.env`; use clear titles (e.g. "The Godfather") so TMDb finds the right movie.
+then update `USER_ID` in the import scripts under `script/`. Skips duplicates; watchlist/favorites stay mutually exclusive. Requires `TMDB_API_KEY` in `.env`; use clear titles (e.g. "The Godfather") so TMDb finds the right movie. Title lists stay in `tmp/` (local only); the import scripts themselves live in `script/` so they’re in the repo.
